@@ -28,11 +28,35 @@ async function run() {
         await client.connect();
 
         const UserDatabase = client.db("BloodDonation").collection("userInfo");
+        const division = client.db("BloodDonation").collection("division");
+        const district = client.db("BloodDonation").collection("distict");
+
+        // division and district related api
+        app.get('/division', async (req, res) => {
+            const result = await division.find().toArray();
+            res.send(result);
+        })
+        app.get('/district', async (req, res) => {
+            const result = await district.find().toArray();
+            res.send(result);
+        })
 
 
+        // user related api
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await UserDatabase.insertOne(user);
+            res.send(result);
+        })
+        app.get('/users', async (req, res) => {
+            const result = await UserDatabase.find().toArray();
+            res.send(result);
+        })
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { Email: email }
+            console.log(email, query)
+            const result = await UserDatabase.findOne(query);
             res.send(result);
         })
         // Send a ping to confirm a successful connection
