@@ -10,7 +10,7 @@ app.use(express.json());
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.ktxzlkz.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -41,6 +41,23 @@ async function run() {
         })
         app.get('/request', async (req, res) => {
             const result = await DonationRequest.find().toArray();
+            res.send(result);
+        })
+        app.get('/request/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await DonationRequest.findOne(query);
+            res.send(result);
+        })
+        app.patch('/request/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    status: 'inprogress'
+                },
+            };
+            const result = await DonationRequest.updateOne(query, updateDoc);
             res.send(result);
         })
         app.get('/pending', async (req, res) => {
