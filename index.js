@@ -30,6 +30,24 @@ async function run() {
         const UserDatabase = client.db("BloodDonation").collection("userInfo");
         const division = client.db("BloodDonation").collection("division");
         const district = client.db("BloodDonation").collection("distict");
+        const DonationRequest = client.db("BloodDonation").collection("DonationRequest");
+
+
+        // DonationRequest api
+        app.post('/request', async (req, res) => {
+            const data = req.body;
+            const result = await DonationRequest.insertOne(data);
+            res.send(result);
+        })
+        app.get('/request', async (req, res) => {
+            const result = await DonationRequest.find().toArray();
+            res.send(result);
+        })
+        app.get('/pending', async (req, res) => {
+            const query = { "status": { $in: ["pending"] } }
+            const result = await DonationRequest.find(query).toArray();
+            res.send(result);
+        })
 
         // division and district related api
         app.get('/division', async (req, res) => {
