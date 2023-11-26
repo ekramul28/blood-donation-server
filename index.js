@@ -43,8 +43,15 @@ async function run() {
             const result = await DonationRequest.find().toArray();
             res.send(result);
         })
-        app.get('/request/:id', async (req, res) => {
+        app.get('/request/:email', async (req, res) => {
+            const email = req.params.email
+            const query = { email: email }
+            const result = await DonationRequest.find(query).toArray();
+            res.send(result);
+        })
+        app.get('/request/man/:id', async (req, res) => {
             const id = req.params.id
+            console.log(id);
             const query = { _id: new ObjectId(id) }
             const result = await DonationRequest.findOne(query);
             res.send(result);
