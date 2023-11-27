@@ -69,7 +69,7 @@ async function run() {
 
             const updateDoc = {
                 $set: {
-                    status: 'cancel'
+                    status: 'canceled '
                 }
 
             };
@@ -100,6 +100,21 @@ async function run() {
 
             };
             const result = await DonationRequest.updateOne(query, updateDoc);
+            res.send(result);
+        })
+        app.get('/pending/all', async (req, res) => {
+            const status = req.query.status;
+            const user = req.query?.user;
+            let query = {};
+
+            if (user) {
+                query.email = user
+            }
+            if (status) {
+                query.status = status
+            }
+
+            const result = await DonationRequest.find(query).toArray();
             res.send(result);
         })
         app.get('/pending', async (req, res) => {
