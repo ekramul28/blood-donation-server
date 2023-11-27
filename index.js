@@ -34,6 +34,13 @@ async function run() {
 
 
         // DonationRequest api
+        app.delete('/delete/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await DonationRequest.deleteOne(query);
+            res.send(result);
+
+        })
         app.post('/request', async (req, res) => {
             const data = req.body;
             const result = await DonationRequest.insertOne(data);
@@ -56,13 +63,41 @@ async function run() {
             const result = await DonationRequest.findOne(query);
             res.send(result);
         })
+        app.patch('/request/cancel/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    status: 'cancel'
+                }
+
+            };
+            const result = await DonationRequest.updateOne(query, updateDoc);
+            res.send(result);
+        })
+        app.patch('/request/done/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    status: 'done'
+                }
+
+            };
+            const result = await DonationRequest.updateOne(query, updateDoc);
+            res.send(result);
+        })
         app.patch('/request/:id', async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
+
             const updateDoc = {
                 $set: {
                     status: 'inprogress'
-                },
+                }
+
             };
             const result = await DonationRequest.updateOne(query, updateDoc);
             res.send(result);
