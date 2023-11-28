@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-require('dotenv').config()
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 
 // middle
@@ -32,12 +33,46 @@ async function run() {
         const district = client.db("BloodDonation").collection("distict");
         const DonationRequest = client.db("BloodDonation").collection("DonationRequest");
 
+        const verifyToken = (req, res, next) => {
+            // console.log('this is the port of', req.headers);
+            if (!req.headers.authorization) {
+                return res.status(401).send({ message: 'unauthorized access' });
+            }
+            const token = req.headers?.authorization?.split(' ')[1]
+            // console.log("token", token);
+            jwt.verify(token, process.env.TOKEN_SECRET_KEY, (error, decode) => {
+                if (error) {
+                    return res.status(401).send({ message: 'unauthorized access' });
 
-        // admin
+                }
+                req.decode = decode
+                next();
+            })
+
+        }
+        const verifyAdmin = async (req, res, next) => {
+            const email = req.decoded.email;
+            const query = { Email: email };
+            const user = await UserDatabase.findOne(query);
+            const isAdmin = user?.Role === 'admin';
+            if (!isAdmin) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+            next();
+        }
+
+        // jwt
+
+        app.post('/jwt', async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.TOKEN_SECRET_KEY, { expiresIn: '1h' })
+
+            res.send({ token });
+        })
 
 
         // DonationRequest api
-        app.delete('/delete/:id', async (req, res) => {
+        app.delete('/delete/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await DonationRequest.deleteOne(query);
@@ -138,7 +173,7 @@ async function run() {
 
 
         // user related api
-        app.post('/users', async (req, res) => {
+        app.post('/users', verifyToken, async (req, res) => {
             const user = req.body;
             const result = await UserDatabase.insertOne(user);
             res.send(result);
@@ -196,10 +231,11 @@ async function run() {
             res.send(result);
         })
         app.get('/users', async (req, res) => {
+
             const result = await UserDatabase.find().toArray();
             res.send(result);
         })
-        app.get('/user/:email', async (req, res) => {
+        app.get('/user/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { Email: email }
 
