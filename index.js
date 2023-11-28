@@ -33,6 +33,9 @@ async function run() {
         const DonationRequest = client.db("BloodDonation").collection("DonationRequest");
 
 
+        // admin
+
+
         // DonationRequest api
         app.delete('/delete/:id', async (req, res) => {
             const id = req.params.id;
@@ -58,7 +61,7 @@ async function run() {
         })
         app.get('/request/man/:id', async (req, res) => {
             const id = req.params.id
-            console.log(id);
+
             const query = { _id: new ObjectId(id) }
             const result = await DonationRequest.findOne(query);
             res.send(result);
@@ -140,6 +143,58 @@ async function run() {
             const result = await UserDatabase.insertOne(user);
             res.send(result);
         })
+        app.patch('/block/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    Status: 'block'
+                }
+
+            };
+            const result = await UserDatabase.updateOne(query, updateDoc);
+            res.send(result);
+        })
+        app.patch('/active/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    Status: 'Active'
+                }
+
+            };
+            const result = await UserDatabase.updateOne(query, updateDoc);
+            res.send(result);
+        })
+        app.patch('/volunteer/user/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    Role: 'volunteer'
+                }
+
+            };
+            const result = await UserDatabase.updateOne(query, updateDoc);
+            res.send(result);
+        });
+        app.patch('/admin/man/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    Role: 'admin'
+                }
+
+            };
+            const result = await UserDatabase.updateOne(query, updateDoc);
+            res.send(result);
+        })
         app.get('/users', async (req, res) => {
             const result = await UserDatabase.find().toArray();
             res.send(result);
@@ -147,7 +202,7 @@ async function run() {
         app.get('/user/:email', async (req, res) => {
             const email = req.params.email;
             const query = { Email: email }
-            console.log(email, query)
+
             const result = await UserDatabase.findOne(query);
             res.send(result);
         })
