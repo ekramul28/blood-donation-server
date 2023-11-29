@@ -26,12 +26,13 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         const UserDatabase = client.db("BloodDonation").collection("userInfo");
         const division = client.db("BloodDonation").collection("division");
         const district = client.db("BloodDonation").collection("distict");
         const DonationRequest = client.db("BloodDonation").collection("DonationRequest");
+        const BlogDB = client.db("BloodDonation").collection("blogs");
 
         const verifyToken = (req, res, next) => {
             // console.log('this is the port of', req.headers);
@@ -70,6 +71,46 @@ async function run() {
             res.send({ token });
         })
 
+
+        app.post('/blogs', async (req, res) => {
+            const blog = req.body;
+            const result = await BlogDB.insertOne(blog);
+            res.send(result);
+        })
+        app.get('/blogs', async (req, res) => {
+            const result = await BlogDB.find().toArray();
+            res.send(result);
+        })
+
+        // search page api hear
+        app.get('/search', async (req, res) => {
+            const email = req.query?.email
+            const blood = req.query?.blood
+            const district = req.query?.district
+            const division = req.query?.division
+            console.log(blood);
+            let query = {};
+
+            if (email) {
+                query.email = email
+            }
+            if (division) {
+                query.division = division
+            }
+
+            if (district) {
+                query.district = district
+            }
+            // if (blood) {
+            //     query.blood = blood
+            // }
+
+
+            const result = await DonationRequest.find(query).toArray();
+            console.log(result);
+            res.send(result);
+
+        })
 
         // DonationRequest api
         app.delete('/delete/:id', verifyToken, verifyAdmin, async (req, res) => {
