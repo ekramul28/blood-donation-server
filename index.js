@@ -52,7 +52,7 @@ async function run() {
 
         }
         const verifyAdmin = async (req, res, next) => {
-            const email = req.decoded.email;
+            const email = req.decoded?.email;
             const query = { Email: email };
             const user = await UserDatabase.findOne(query);
             const isAdmin = user?.Role === 'admin';
@@ -71,7 +71,14 @@ async function run() {
             res.send({ token });
         })
 
+        // blog
+        app.delete('/blogs/:id', verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await BlogDB.deleteOne(query);
+            res.send(result);
 
+        })
         app.post('/blogs', async (req, res) => {
             const blog = req.body;
             const result = await BlogDB.insertOne(blog);
