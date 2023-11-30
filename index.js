@@ -120,7 +120,30 @@ async function run() {
         })
 
         // DonationRequest api
-        app.delete('/delete/:id', verifyToken, verifyAdmin, async (req, res) => {
+        app.patch('/update/:id', async (req, res) => {
+            const id = req.params.id;
+            const data = req.body;
+            const query = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: {
+                    name: data.name,
+                    email: data.email,
+                    recipientName: data.recipientName,
+                    hospitalName: data.hospitalName,
+                    message: data.message,
+                    division: data.division,
+                    district: data.district,
+                    blood: data.blood,
+                    donationDate: data.donationDate,
+                    donationTime: data.donationTime
+                }
+
+            };
+            const result = await DonationRequest.updateOne(query, updateDoc);
+            res.send(result);
+        })
+        app.delete('/delete/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await DonationRequest.deleteOne(query);
